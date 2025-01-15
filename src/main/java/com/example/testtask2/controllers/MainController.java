@@ -57,7 +57,7 @@ public class MainController {
     }
 
     /**
-     * Finds the most experienced employee among selected
+     * Saves stats about companies to the temporary file for later usage
      */
     @GetMapping("/save-stats")
     public ResponseEntity<?> saveStats() {
