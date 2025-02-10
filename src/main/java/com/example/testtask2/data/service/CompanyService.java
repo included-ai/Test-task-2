@@ -7,9 +7,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class CompanyService {
@@ -17,19 +16,18 @@ public class CompanyService {
 
     private final List<Company> companies = new ArrayList<>();
 
-    public void addCompany(String name, List<Employee> employees) {
-        this.companies.add(new Company(name, employees));
+    public void addCompany(String id, String name, List<Employee> employees) {
+        this.companies.add(new Company(id, name, employees));
     }
 
     public List<Company> getCompanies() {
         return this.companies;
     }
 
-
-    public Company getCompany(String companyName) {
+    public Company getCompany(String id) {
         Company company = null;
         for (var c : this.companies) {
-            if (c.getName() == companyName) {
+            if (c.getId() == id) {
                 company = c;
             }
         }
@@ -59,13 +57,32 @@ public class CompanyService {
         return findMostExperiencedEmployee(selectedEmployees);
     }
 
-
     public void saveStats() throws IOException {
         try( var writer = new PrintWriter(STATS_FILE, StandardCharsets.UTF_8)) {
             for (var company : this.companies) {
                 writer.printf("Company %s, size: %d\n", company.getName(), company.allEmployees().size());
             }
         }
+    }
+
+    public Map<Company,Double> averageAgeOfEmployees() {
+        return this.companies
+            .stream()
+            .map(company -> Map.entry(company, company.allEmployees().stream().mapToInt(Employee::age).average()))
+            .filter(entry -> entry.getValue().isPresent())
+            .map(entry -> Map.entry(entry.getKey(), entry.getValue().getAsDouble()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+
+    public Company companyOfEmployee(String employeeName) {
+        Company company = null;
+        for (var c : this.companies) {
+            if (c.getEmployee(employeeName) != null) {
+                company = c;
+            }
+        }
+        return company;
     }
 
 

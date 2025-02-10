@@ -6,12 +6,18 @@ import java.util.Objects;
 
 
 public final class Company {
+    private final String id;
     private final String name;
     private final List<Employee> employees;
 
-    public Company(String name, List<Employee> employees) {
+    public Company(String id, String name, List<Employee> employees) {
+        this.id = id;
         this.name = name;
         this.employees = employees;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {

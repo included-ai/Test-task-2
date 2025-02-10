@@ -1,5 +1,6 @@
 package com.example.testtask2.controllers;
 
+import com.example.testtask2.data.model.Company;
 import com.example.testtask2.data.model.Employee;
 import com.example.testtask2.data.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
-public class MainController {
+@RequestMapping("/api/companies")
+public class CompanyController {
 
     @Autowired
     private CompanyService companyService;
@@ -19,9 +21,9 @@ public class MainController {
     /**
      * Adds company to the service
      */
-    @PutMapping("/company")
-    public void addCompany(@RequestParam String name, @RequestBody List<Employee> employees) {
-        this.companyService.addCompany(name, employees);
+    @PutMapping
+    public void addCompany(@RequestParam String id, @RequestParam String name, @RequestBody List<Employee> employees) {
+        this.companyService.addCompany(id, name, employees);
     }
 
     /**
@@ -41,7 +43,7 @@ public class MainController {
     }
 
     /**
-     * Returns the most experienced employee (employee with the longest tenure)
+     * Returns the most experienced employee (employee with the longest tenure) among all companies
      */
     @PostMapping("/most-experienced")
     public Employee employees() {
@@ -67,5 +69,23 @@ public class MainController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(e.getStackTrace());
         }
+    }
+
+    /**
+     * Calculates average age of employees for each company
+     */
+    @GetMapping("/avg-age")
+    public Map<Company,Double> averageAge() {
+        return this.companyService.averageAgeOfEmployees();
+    }
+
+    /**
+     * Calculates average age of the company of the requested employee
+     */
+    @GetMapping("/avg-age-of")
+    public Double averageAgeOfEmployeeCompany(@RequestParam String employeeName) {
+        Map<Company,Double> averageAges = this.companyService.averageAgeOfEmployees();
+        Company employeeCompany = this.companyService.companyOfEmployee(employeeName);
+        return averageAges.get(employeeCompany);
     }
 }
